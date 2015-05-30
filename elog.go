@@ -18,7 +18,7 @@ const (
 	LOG_SHIFT_BY_HOUR = 3 //one file every hour
 	LOG_SHIFT_BY_DAY  = 4 //one file every day
 
-	LOG_WRITE_INTERVAL_MSEC    = 10     //millisecond
+	LOG_WRITE_INTERVAL_MSEC    = 60     //millisecond
 	LOG_WRITE_BUFFER_CHECK_LEN = 1 * 32 //KByte
 
 	LOG_FATAL = 0x01 //Log Level: VIP / fatal /error / info / debug
