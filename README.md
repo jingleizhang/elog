@@ -1,2 +1,7 @@
 # elog
-Effective Logger in Go.
+
+Effective Logger written in Go.
+
+
+TODO:
+1. console color 
