@@ -344,14 +344,15 @@ func (elog *ELog) flush() {
 }
 
 func (elog *ELog) dlog(v string) {
+	elog.lock.Lock()
+	defer elog.lock.Unlock()
+
 	//Shift check.
 	elog.shift()
 
 	//Add data to local buffer, then batch flush to disk.
-	elog.lock.Lock()
 	elog.buffers = append(elog.buffers, v)
 	if ((time.Now().UnixNano()/1000000)-elog.lastWriteMS > LOG_WRITE_INTERVAL_MSEC) || (elog.bufferLength() > LOG_WRITE_BUFFER_CHECK_LEN) {
 		elog.flush()
 	}
-	elog.lock.Unlock()
 }
