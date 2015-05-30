@@ -16,7 +16,7 @@ func newStatLogger() (interface{}, error) {
 	return logger, nil
 }
 
-func GetStatLogger() *elog.ELog {
+func Logger() *elog.ELog {
 	logger, err := statLogger.Get()
 	if logger != nil && err == nil {
 		return logger.(*elog.ELog)

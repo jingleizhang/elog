@@ -84,7 +84,7 @@ func NewELog(logprefix string, logmode int, maxSizeKB int, level int) *ELog {
 	return elog
 }
 
-func (elog *ELog) DLogFatal(format interface{}, v ...interface{}) {
+func (elog *ELog) Fatal(format interface{}, v ...interface{}) {
 	if (elog.logLevel & LOG_FATAL) > 0 {
 		elog.dlog(elog.getExtraInfo("FATAL") + fmt.Sprint(format) + fmt.Sprint(v...) + "\n")
 		elog.flush()
@@ -92,24 +92,24 @@ func (elog *ELog) DLogFatal(format interface{}, v ...interface{}) {
 	}
 }
 
-func (elog *ELog) DLogVIP(format interface{}, v ...interface{}) {
-	//VIP: do not check level
+func (elog *ELog) VIP(format interface{}, v ...interface{}) {
+	//VIP Level: do not check actual log level.
 	elog.dlog(elog.getExtraInfo("VIP") + fmt.Sprint(format) + fmt.Sprint(v...) + "\n")
 }
 
-func (elog *ELog) DLogError(format interface{}, v ...interface{}) {
+func (elog *ELog) Error(format interface{}, v ...interface{}) {
 	if (elog.logLevel & LOG_ERROR) > 0 {
 		elog.dlog(elog.getExtraInfo("ERROR") + fmt.Sprint(format) + fmt.Sprint(v...) + "\n")
 	}
 }
 
-func (elog *ELog) DLogInfo(format interface{}, v ...interface{}) {
+func (elog *ELog) Info(format interface{}, v ...interface{}) {
 	if (elog.logLevel & LOG_INFO) > 0 {
 		elog.dlog(elog.getExtraInfo("INFO") + fmt.Sprint(format) + fmt.Sprint(v...) + "\n")
 	}
 }
 
-func (elog *ELog) DLogDebug(format interface{}, v ...interface{}) {
+func (elog *ELog) Debug(format interface{}, v ...interface{}) {
 	if (elog.logLevel & LOG_DEBUG) > 0 {
 		elog.dlog(elog.getExtraInfo("DEBUG") + fmt.Sprint(format) + fmt.Sprint(v...) + "\n")
 	}
@@ -161,11 +161,11 @@ func makeFileName(prefix, date, hour, min string, logMode int) string {
 	var fileName string
 	switch logMode {
 	case LOG_SHIFT_BY_MIN:
-		fileName = prefix + "_" + date + "_" + hour + "_" + min
+		fileName = prefix + "." + date + "." + hour + "." + min
 	case LOG_SHIFT_BY_HOUR:
-		fileName = prefix + "_" + date + "_" + hour
+		fileName = prefix + "." + date + "." + hour
 	case LOG_SHIFT_BY_DAY:
-		fileName = prefix + "_" + date
+		fileName = prefix + "." + date
 	case LOG_SHIFT_BY_SIZE:
 		fileName = prefix
 	default:
@@ -344,6 +344,7 @@ func (elog *ELog) flush() {
 }
 
 func (elog *ELog) dlog(v string) {
+	//Shift check.
 	elog.shift()
 
 	//Add data to local buffer, then batch flush to disk.
