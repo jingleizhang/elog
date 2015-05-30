@@ -2,7 +2,7 @@
 
 Effective Logger written in Go.
 
-Performance:
+# Performance:
 
 Use internal flush time and internal cache to reduce disk I/O operations.
 
@@ -10,6 +10,6 @@ Use internal flush time and internal cache to reduce disk I/O operations.
 
 (2). Internal cache: 32 KByte
 
-TODO:
+# TODO:
 
 (1). console color 
