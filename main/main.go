@@ -8,5 +8,5 @@ import (
 func main() {
 	runtime.GOMAXPROCS(2)
 
-	elog.GetStatLogger().DLogInfo("this is logger test|int|", 100, "|string|", "hello", "|float32|", 20.15, "|struct|etc.")
+	elog.Logger().Info("this is logger test|int|", 100, "|string|", "hello", "|float32|", 20.15, "|struct|etc.")
 }
