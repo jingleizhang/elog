@@ -11,4 +11,5 @@ Use internal flush time and internal cache to reduce disk I/O operations.
 (2). Internal cache: 32 KByte
 
 TODO:
-1. console color 
+
+(1). console color 
