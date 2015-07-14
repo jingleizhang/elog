@@ -34,7 +34,7 @@ func TestBaselog(t *testing.T) {
 
 			for j := 0; j < 100; j++ {
 				sum := index*10000 + j
-				logger.DLogInfo("i|", index, "|sum|", sum)
+				logger.Info("i|", index, "|sum|", sum)
 				time.Sleep(1 * time.Second)
 			}
 
