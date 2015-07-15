@@ -89,15 +89,23 @@ func NewELog(logprefix string, logmode int, maxSizeKB int, level int) *ELog {
 
 func (elog *ELog) Fatal(format interface{}, v ...interface{}) {
 	if (elog.logLevel & LOG_FATAL) > 0 {
-		elog.dlog(elog.getExtraInfo("FATAL") + fmt.Sprint(format) + fmt.Sprint(v...) + "\n")
+		buf := elog.getExtraInfo("FATAL") + fmt.Sprint(format) + fmt.Sprint(v...) + "\n"
+		elog.dlog(buf)
 		elog.flush()
+		fmt.Fprint(os.Stdout, buf)
 		os.Exit(-1)
 	}
 }
 
+//VIP Level: do not check actual log level.
 func (elog *ELog) VIP(format interface{}, v ...interface{}) {
-	//VIP Level: do not check actual log level.
-	elog.dlog(elog.getExtraInfo("VIP") + fmt.Sprint(format) + fmt.Sprint(v...) + "\n")
+	buf := elog.getExtraInfo("VIP") + fmt.Sprint(format) + fmt.Sprint(v...) + "\n"
+	elog.dlog(buf)
+	if elog.keepInConsole {
+		escapeCode := color.Colorize("g")
+		io.WriteString(os.Stdout, escapeCode)
+		fmt.Fprint(os.Stdout, color.Sprintf(buf))
+	}
 }
 
 func (elog *ELog) Error(format interface{}, v ...interface{}) {
@@ -107,8 +115,7 @@ func (elog *ELog) Error(format interface{}, v ...interface{}) {
 		if elog.keepInConsole {
 			escapeCode := color.Colorize("r")
 			io.WriteString(os.Stdout, escapeCode)
-			line := color.Sprintf(buf)
-			fmt.Fprint(os.Stdout, line)
+			fmt.Fprint(os.Stdout, color.Sprintf(buf))
 		}
 	}
 }
@@ -120,15 +127,18 @@ func (elog *ELog) Info(format interface{}, v ...interface{}) {
 		if elog.keepInConsole {
 			escapeCode := color.Colorize("y")
 			io.WriteString(os.Stdout, escapeCode)
-			line := color.Sprintf(buf)
-			fmt.Fprint(os.Stdout, line)
+			fmt.Fprint(os.Stdout, color.Sprintf(buf))
 		}
 	}
 }
 
 func (elog *ELog) Debug(format interface{}, v ...interface{}) {
 	if (elog.logLevel & LOG_DEBUG) > 0 {
-		elog.dlog(elog.getExtraInfo("DEBUG") + fmt.Sprint(format) + fmt.Sprint(v...) + "\n")
+		buf := elog.getExtraInfo("DEBUG") + fmt.Sprint(format) + fmt.Sprint(v...) + "\n"
+		elog.dlog(buf)
+		if elog.keepInConsole {
+			fmt.Fprint(os.Stdout, buf)
+		}
 	}
 }
 
