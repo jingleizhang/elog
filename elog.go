@@ -104,7 +104,6 @@ func (elog *ELog) Error(format interface{}, v ...interface{}) {
 	if (elog.logLevel & LOG_ERROR) > 0 {
 		buf := elog.getExtraInfo("ERROR") + fmt.Sprint(format) + fmt.Sprint(v...) + "\n"
 		elog.dlog(buf)
-		fmt.Println(elog.keepInConsole)
 		if elog.keepInConsole {
 			escapeCode := color.Colorize("r")
 			io.WriteString(os.Stdout, escapeCode)
@@ -116,7 +115,14 @@ func (elog *ELog) Error(format interface{}, v ...interface{}) {
 
 func (elog *ELog) Info(format interface{}, v ...interface{}) {
 	if (elog.logLevel & LOG_INFO) > 0 {
-		elog.dlog(elog.getExtraInfo("INFO") + fmt.Sprint(format) + fmt.Sprint(v...) + "\n")
+		buf := elog.getExtraInfo("INFO") + fmt.Sprint(format) + fmt.Sprint(v...) + "\n"
+		elog.dlog(buf)
+		if elog.keepInConsole {
+			escapeCode := color.Colorize("y")
+			io.WriteString(os.Stdout, escapeCode)
+			line := color.Sprintf(buf)
+			fmt.Fprint(os.Stdout, line)
+		}
 	}
 }
 
@@ -130,6 +136,7 @@ func (elog *ELog) Fini() {
 	elog.DLogFlush()
 	elog.keepInFile = false
 	elog.keepInTracking = false
+	elog.keepInConsole = false
 	close(elog.trackingChan)
 }
 
