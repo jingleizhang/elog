@@ -12,7 +12,13 @@ var statLogger elog.Singleton
 
 func newStatLogger() (interface{}, error) {
 	logger := elog.NewELog("stat_logger", elog.LOG_SHIFT_BY_DAY, 2*1024*1024, elog.LOG_FATAL|elog.LOG_ERROR|elog.LOG_INFO|elog.LOG_DEBUG)
+
+	//Is kept in Files?
 	logger.SetKeptInFile(true)
+
+	//Is kept in Console?
+	logger.SetKeptInConsole(true)
+
 	return logger, nil
 }
 
