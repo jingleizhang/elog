@@ -2,6 +2,7 @@ package elog
 
 import (
 	"fmt"
+	"github.com/wsxiaoys/terminal/color"
 	"net"
 	"net/http"
 	"net/url"
@@ -10,36 +11,37 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"io"
 )
 
 const (
 	LOG_SHIFT_BY_SIZE = 1 //roll log file with fixed size
-	LOG_SHIFT_BY_MIN  = 2 //one file every minute
+	LOG_SHIFT_BY_MIN = 2 //one file every                                     minute
 	LOG_SHIFT_BY_HOUR = 3 //one file every hour
-	LOG_SHIFT_BY_DAY  = 4 //one file every day
+	LOG_SHIFT_BY_DAY = 4 //one file every day
 
-	LOG_WRITE_INTERVAL_MSEC    = 60     //millisecond
+	LOG_WRITE_INTERVAL_MSEC = 60     //millisecond
 	LOG_WRITE_BUFFER_CHECK_LEN = 1 * 32 //KByte
 
 	LOG_FATAL = 0x01 //Log Level: VIP / fatal /error / info / debug
 	LOG_ERROR = 0x02
-	LOG_INFO  = 0x04
+	LOG_INFO = 0x04
 	LOG_DEBUG = 0x08
 )
 
 const (
-	TRACKING_URL        = "http://tracking.bdp.cn/stat?guid=tracking&"
-	LOG_JSON_IP         = "src_ip"
-	LOG_JSON_DATE       = "src_date"
-	LOG_JSON_LEVEL      = "log_level"
-	LOG_JSON_NOTE       = "log_note"
-	LOG_JSON_ENDPOINT   = "end_point" //URL Encode
-	LOG_JSON_PRIORITY   = "priority"
+	TRACKING_URL = "http://tracking.bdp.cn/stat?guid=tracking&"
+	LOG_JSON_IP = "src_ip"
+	LOG_JSON_DATE = "src_date"
+	LOG_JSON_LEVEL = "log_level"
+	LOG_JSON_NOTE = "log_note"
+	LOG_JSON_ENDPOINT = "end_point" //URL Encode
+	LOG_JSON_PRIORITY = "priority"
 	LOG_JSON_NEEDFILTER = "needfilter"
-	LOG_JSON_METHOD     = "httpmethod"
-	LOG_JSON_QUERY      = "query" //URL Encode
-	LOG_JSON_VIP        = "vip"
-	LOG_JSON_EXTRACT    = "needextractlinks"
+	LOG_JSON_METHOD = "httpmethod"
+	LOG_JSON_QUERY = "query" //URL Encode
+	LOG_JSON_VIP = "vip"
+	LOG_JSON_EXTRACT = "needextractlinks"
 )
 
 type ELog struct {
@@ -56,9 +58,9 @@ type ELog struct {
 	lastWriteMS    int64  //milli second
 	keepInTracking bool   //is tracking, default: false
 	keepInFile     bool   //is kept in file, default: true
-	//keepInConsole  bool   //is kept in console
-	trackingChan chan string
-	httpClient   *http.Client
+	keepInConsole  bool   //is kept in console, default: true
+	trackingChan   chan string
+	httpClient     *http.Client
 }
 
 func NewELog(logprefix string, logmode int, maxSizeKB int, level int) *ELog {
@@ -71,6 +73,7 @@ func NewELog(logprefix string, logmode int, maxSizeKB int, level int) *ELog {
 		logLevel:       level,
 		keepInTracking: false,
 		keepInFile:     true,
+		keepInConsole:  true,
 		trackingChan:   make(chan string, 256),
 		httpClient:     newHttpClient(10),
 	}
@@ -99,7 +102,15 @@ func (elog *ELog) VIP(format interface{}, v ...interface{}) {
 
 func (elog *ELog) Error(format interface{}, v ...interface{}) {
 	if (elog.logLevel & LOG_ERROR) > 0 {
-		elog.dlog(elog.getExtraInfo("ERROR") + fmt.Sprint(format) + fmt.Sprint(v...) + "\n")
+		buf := elog.getExtraInfo("ERROR") + fmt.Sprint(format) + fmt.Sprint(v...) + "\n"
+		elog.dlog(buf)
+		fmt.Println(elog.keepInConsole)
+		if elog.keepInConsole {
+			escapeCode := color.Colorize("r")
+			io.WriteString(os.Stdout, escapeCode)
+			line := color.Sprintf(buf)
+			fmt.Fprint(os.Stdout, line)
+		}
 	}
 }
 
@@ -136,6 +147,10 @@ func (elog *ELog) SetTracking(b bool, moduleName int) {
 
 func (elog *ELog) SetKeptInFile(b bool) {
 	elog.keepInFile = b
+}
+
+func (elog *ELog) SetKeptInConsole(b bool) {
+	elog.keepInConsole = b
 }
 
 func newHttpClient(timeOutSeconds int) *http.Client {
